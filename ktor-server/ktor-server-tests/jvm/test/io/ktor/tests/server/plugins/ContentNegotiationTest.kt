@@ -109,7 +109,6 @@ class ContentNegotiationTest {
         application.install(ContentNegotiation) {
             register(ContentType.Application.Zip, customContentConverter)
         }
-        application.install(TransformationChecker) {}
 
         application.routing {
             post("/") {
@@ -130,7 +129,6 @@ class ContentNegotiationTest {
         application.install(ContentNegotiation) {
             register(ContentType.Application.Xml, customContentConverter)
         }
-        application.install(TransformationChecker) {}
 
         application.routing {
             post("/") {
