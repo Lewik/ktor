@@ -13,7 +13,6 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
-import io.ktor.server.transformcheck.*
 import io.ktor.util.reflect.*
 import io.ktor.utils.io.*
 import io.ktor.utils.io.charsets.*
@@ -305,10 +304,10 @@ class ContentNegotiationTest {
                 assertEquals("[OK]", call.response.content)
             }
 
-            assertFails {
-                handleRequest(HttpMethod.Get, "/2") {
-                    addHeader(HttpHeaders.Accept, customContentType.toString())
-                }
+            handleRequest(HttpMethod.Get, "/2") {
+                addHeader(HttpHeaders.Accept, customContentType.toString())
+            }.let { call ->
+                assertEquals(HttpStatusCode.NotAcceptable, call.response.status())
             }
         }
     }

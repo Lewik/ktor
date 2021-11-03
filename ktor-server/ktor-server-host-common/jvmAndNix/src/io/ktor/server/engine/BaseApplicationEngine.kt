@@ -107,7 +107,7 @@ public abstract class BaseApplicationEngine(
         intercept(ApplicationCallPipeline.Plugins) {
             try {
                 proceed()
-            } catch (e: UnsupportedMediaTypeException) {
+            } catch (e: CannotTransformContentToTypeException) {
                 call.respond(HttpStatusCode.UnsupportedMediaType)
             }
         }
@@ -115,21 +115,6 @@ public abstract class BaseApplicationEngine(
         sendPipeline.intercept(ApplicationSendPipeline.After) { subject ->
             if (subject !is OutgoingContent) {
                 proceedWith(HttpStatusCodeContent(HttpStatusCode.NotAcceptable))
-            }
-        }
-
-        receivePipeline.intercept(ApplicationReceivePipeline.After) { subject ->
-            val requestContentType = try {
-                call.request.contentType().withoutParameters()
-            } catch (parseFailure: BadContentTypeFormatException) {
-                throw BadRequestException(
-                    "Illegal Content-Type header format: ${call.request.headers[HttpHeaders.ContentType]}",
-                    parseFailure
-                )
-            }
-
-            if (!subject.typeInfo.type.isInstance(subject.value)) {
-                throw UnsupportedMediaTypeException(requestContentType)
             }
         }
     }
