@@ -113,7 +113,7 @@ public abstract class BaseApplicationEngine(
         }
 
         val checkBodyPhase = PipelinePhase("BodyTransformationCheckPostRender")
-        sendPipeline.insertPhaseAfter(checkBodyPhase, ApplicationSendPipeline.Render)
+        sendPipeline.insertPhaseAfter(ApplicationSendPipeline.Render, checkBodyPhase)
         sendPipeline.intercept(checkBodyPhase) { subject ->
             if (subject !is OutgoingContent) {
                 proceedWith(HttpStatusCodeContent(HttpStatusCode.NotAcceptable))
