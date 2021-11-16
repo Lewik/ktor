@@ -131,7 +131,7 @@ class ApplicationPluginTest {
         }
 
         val pluginG = createApplicationPlugin("G", {}) {
-            beforePlugins(pluginF) {
+            before(pluginF) {
                 onCallRespond { call ->
                     val data = call.request.headers["F"]
                     if (data != null) {
@@ -364,7 +364,7 @@ class ApplicationPluginTest {
         }
 
         val pluginG = createRouteScopedPlugin("G", {}) {
-            beforePlugins(pluginF) {
+            before(pluginF) {
                 onCallRespond { call ->
                     val data = call.request.headers["F"]
                     if (data != null) {
@@ -414,7 +414,7 @@ class ApplicationPluginTest {
         }
 
         val pluginG = createRouteScopedPlugin("G", {}) {
-            beforePlugins(pluginF) {
+            before(pluginF) {
                 onCallRespond { call ->
                     val data = call.request.headers["F"]
                     if (data != null) {

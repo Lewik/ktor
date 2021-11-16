@@ -85,9 +85,9 @@ public abstract class RelativePluginBuilder(
 
     override val onCall: OnCall = object : OnCall {
         override operator fun invoke(block: suspend CallContext.(ApplicationCall) -> Unit) {
-            insertToPhaseRelatively(
-                currentPlugin.callInterceptions,
-                otherPlugins.map { it.callInterceptions },
+            this@RelativePluginBuilder.insertToPhaseRelatively(
+                this@RelativePluginBuilder.currentPlugin.callInterceptions,
+                this@RelativePluginBuilder.otherPlugins.map { it.callInterceptions },
                 ::CallContext
             ) { call -> block(call) }
         }
@@ -95,9 +95,9 @@ public abstract class RelativePluginBuilder(
 
     override val onCallReceive: OnCallReceive = object : OnCallReceive {
         override operator fun invoke(block: suspend CallReceiveContext.(ApplicationCall) -> Unit) {
-            insertToPhaseRelatively(
-                currentPlugin.onReceiveInterceptions,
-                otherPlugins.map { it.onReceiveInterceptions },
+            this@RelativePluginBuilder.insertToPhaseRelatively(
+                this@RelativePluginBuilder.currentPlugin.onReceiveInterceptions,
+                this@RelativePluginBuilder.otherPlugins.map { it.onReceiveInterceptions },
                 ::CallReceiveContext,
                 block
             )
@@ -106,9 +106,9 @@ public abstract class RelativePluginBuilder(
 
     override val onCallRespond: OnCallRespond = object : OnCallRespond {
         override operator fun invoke(block: suspend CallRespondContext.(ApplicationCall) -> Unit) {
-            insertToPhaseRelatively(
-                currentPlugin.onResponseInterceptions,
-                otherPlugins.map { it.onResponseInterceptions },
+            this@RelativePluginBuilder.insertToPhaseRelatively(
+                this@RelativePluginBuilder.currentPlugin.onResponseInterceptions,
+                this@RelativePluginBuilder.otherPlugins.map { it.onResponseInterceptions },
                 ::CallRespondContext,
                 block
             )
@@ -117,9 +117,9 @@ public abstract class RelativePluginBuilder(
         override fun afterTransform(
             block: suspend CallRespondAfterTransformContext.(ApplicationCall, Any) -> Unit
         ) {
-            insertToPhaseRelativelyWithMessage(
-                currentPlugin.afterResponseInterceptions,
-                otherPlugins.map { it.afterResponseInterceptions },
+            this@RelativePluginBuilder.insertToPhaseRelativelyWithMessage(
+                this@RelativePluginBuilder.currentPlugin.afterResponseInterceptions,
+                this@RelativePluginBuilder.otherPlugins.map { it.afterResponseInterceptions },
                 ::CallRespondAfterTransformContext,
                 block
             )
@@ -142,7 +142,7 @@ public abstract class RelativePluginBuilder(
 /**
  * Contains handlers executed after the same handler is finished for all [otherPlugins].
  **/
-public class AfterPluginBuilder(
+public class AfterPluginsBuilder(
     currentPlugin: PluginBuilder<*>,
     otherPlugins: List<PluginBuilder<*>>
 ) : RelativePluginBuilder(currentPlugin, otherPlugins) {
@@ -160,6 +160,7 @@ public class AfterPluginBuilder(
 /**
  * Contains handlers executed before the same handler is finished for all [otherPlugins].
  **/
+@PluginsDslMarker
 public class BeforePluginsBuilder(
     currentPlugin: PluginBuilder<*>,
     otherPlugins: List<PluginBuilder<*>>

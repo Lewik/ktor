@@ -17,6 +17,7 @@ import io.ktor.utils.io.*
  * Every call handler ([PluginBuilder.onCall], [PluginBuilder.onCallReceive], [PluginBuilder.onCallRespond], and so on)
  * of your plugin has a derivative of [CallHandlingContext] as a receiver.
  **/
+@PluginsDslMarker
 public open class CallHandlingContext(internal open val context: PipelineContext<*, ApplicationCall>) {
     // Internal usage for tests only
     internal fun finish() = context.finish()
@@ -28,12 +29,14 @@ public open class CallHandlingContext(internal open val context: PipelineContext
  *
  * @see CallHandlingContext
  **/
+@PluginsDslMarker
 public class CallContext(override val context: PipelineContext<Unit, ApplicationCall>) :
     CallHandlingContext(context)
 
 /**
  * Contains type information about the current request or response body when performing a transformation.
  * */
+@PluginsDslMarker
 public class TransformContext(public val requestedType: TypeInfo?)
 
 /**
@@ -42,6 +45,7 @@ public class TransformContext(public val requestedType: TypeInfo?)
  *
  * @see CallHandlingContext
  **/
+@PluginsDslMarker
 public class CallReceiveContext(
     override val context: PipelineContext<ApplicationReceiveRequest, ApplicationCall>
 ) : CallHandlingContext(context) {
@@ -70,6 +74,7 @@ public class CallReceiveContext(
  *
  * @see CallHandlingContext
  **/
+@PluginsDslMarker
 public class CallRespondContext(
     override val context: PipelineContext<Any, ApplicationCall>
 ) : CallHandlingContext(context) {
@@ -89,6 +94,7 @@ public class CallRespondContext(
  *
  * @see CallHandlingContext
  **/
+@PluginsDslMarker
 public class CallRespondAfterTransformContext(
     override val context: PipelineContext<Any, ApplicationCall>
 ) : CallHandlingContext(context) {

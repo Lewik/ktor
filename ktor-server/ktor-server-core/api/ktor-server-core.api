@@ -113,8 +113,17 @@ public final class io/ktor/server/application/RouteScopedPluginKt {
 	public static final fun findPluginInRoute (Lio/ktor/server/routing/Route;Lio/ktor/server/application/Plugin;)Ljava/lang/Object;
 }
 
-public final class io/ktor/server/application/plugins/api/AfterPluginBuilder : io/ktor/server/application/plugins/api/RelativePluginBuilder {
+public final class io/ktor/server/application/plugins/api/AfterPluginsBuilder : io/ktor/server/application/plugins/api/RelativePluginBuilder {
 	public fun <init> (Lio/ktor/server/application/plugins/api/PluginBuilder;Ljava/util/List;)V
+}
+
+public abstract interface class io/ktor/server/application/plugins/api/Anchor {
+	public abstract fun after ()Lio/ktor/server/application/plugins/api/AnchorContext;
+	public abstract fun before ()Lio/ktor/server/application/plugins/api/AnchorContext;
+}
+
+public abstract interface class io/ktor/server/application/plugins/api/AnchorContext {
+	public abstract fun install (Lio/ktor/server/application/Application;)V
 }
 
 public final class io/ktor/server/application/plugins/api/ApplicationConfigExtensionsKt {
@@ -174,9 +183,11 @@ public abstract interface class io/ktor/server/application/plugins/api/OnCallRes
 }
 
 public abstract class io/ktor/server/application/plugins/api/PluginBuilder : io/ktor/server/application/plugins/api/PluginBuilderBase {
-	public final fun afterPlugins ([Lio/ktor/server/application/Plugin;Lkotlin/jvm/functions/Function1;)V
+	public final fun after (Lio/ktor/server/application/plugins/api/Anchor;Lkotlin/jvm/functions/Function1;)V
+	public final fun after ([Lio/ktor/server/application/Plugin;Lkotlin/jvm/functions/Function1;)V
 	public fun applicationShutdownHook (Lkotlin/jvm/functions/Function1;)V
-	public final fun beforePlugins ([Lio/ktor/server/application/Plugin;Lkotlin/jvm/functions/Function1;)V
+	public final fun before (Lio/ktor/server/application/plugins/api/Anchor;Lkotlin/jvm/functions/Function1;)V
+	public final fun before ([Lio/ktor/server/application/Plugin;Lkotlin/jvm/functions/Function1;)V
 	public final fun getApplicationConfig ()Lio/ktor/server/config/ApplicationConfig;
 	public final fun getEnvironment ()Lio/ktor/server/application/ApplicationEnvironment;
 	public fun getOnCall ()Lio/ktor/server/application/plugins/api/OnCall;

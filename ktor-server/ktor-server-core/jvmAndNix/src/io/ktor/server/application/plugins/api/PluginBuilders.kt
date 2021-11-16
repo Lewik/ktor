@@ -20,6 +20,7 @@ import kotlin.random.*
  * A builder that is available inside a plugin creation block. It allows you to define handlers for different stages
  * (a.k.a. phases) of the HTTP pipeline.
  **/
+@PluginsDslMarker
 public interface PluginBuilderBase {
     /**
      * Specifies how to modify HTTP call handling for the current [PluginBuilder].
@@ -81,6 +82,8 @@ public abstract class PluginBuilder<PluginConfig : Any> internal constructor(
     internal val afterResponseInterceptions: MutableList<ResponseInterception> = mutableListOf()
 
     internal val pipelineHandlers: MutableList<PipelineHandler> = mutableListOf()
+
+    internal val anchors = mutableListOf<AnchorContext>()
 
     internal fun newPhase(): PipelinePhase = PipelinePhase("${key.name}Phase${Random.nextInt()}")
 
@@ -196,12 +199,12 @@ public abstract class PluginBuilder<PluginConfig : Any> internal constructor(
      * (such as [onCall], [onCallRespond], and so on). These actions are executed right after all actions defined
      * by the given [plugin] are already executed in the same stage.
      **/
-    public fun afterPlugins(
+    public fun after(
         vararg targetPlugins: Plugin<*, *, PluginInstance>,
-        build: AfterPluginBuilder.() -> Unit
+        build: AfterPluginsBuilder.() -> Unit
     ) {
         pipelineHandlers.add { pipeline ->
-            AfterPluginBuilder(this, targetPlugins.map { pipeline.plugin(it).builder }).build()
+            AfterPluginsBuilder(this, targetPlugins.map { pipeline.plugin(it).builder }).build()
         }
     }
 
@@ -215,7 +218,7 @@ public abstract class PluginBuilder<PluginConfig : Any> internal constructor(
      * (such as [onCall], [onCallRespond], and so on) and each of these actions will be executed right before all actions defined
      * by the given [targetPlugins] were already executed in the same stage.
      **/
-    public fun beforePlugins(
+    public fun before(
         vararg targetPlugins: Plugin<*, *, PluginInstance>,
         build: BeforePluginsBuilder.() -> Unit
     ) {
@@ -224,23 +227,23 @@ public abstract class PluginBuilder<PluginConfig : Any> internal constructor(
         }
     }
 
-    public fun <ContextT : PluginAnchorContext> beforeAnchor(
-        anchor: PluginAnchor<ContextT>,
-        build: ContextT.() -> Unit
+    public fun <Context : AnchorContext> before(
+        anchor: Anchor<Context>,
+        build: Context.() -> Unit
     ) {
-        when (anchor) {
-            is PluginAnchor.OnCallPluginAnchor -> {
-                pipelineHandlers.add {
-                    BeforeAnchorBuilder(this, anchor).anchorContext.build()
-                }
-            }
-            is PluginAnchor.OnCallResondPluginAnchor -> TODO()
-            is PluginAnchor.OnCallReceivePluginAnchor -> TODO()
-        }
+        val before = anchor.before()
+        before.build()
+
+        anchors.add(before)
     }
 
-    public fun afterAnchor(anchor: PluginAnchor, build: AfterAnchorBuilder.() -> Unit) {
-
+    public fun <Context : AnchorContext> after(
+        anchor: Anchor<Context>,
+        build: Context.() -> Unit
+    ) {
+        val after = anchor.after()
+        after.build()
+        anchors.add(after)
     }
 
     override fun applicationShutdownHook(hook: (Application) -> Unit) {
