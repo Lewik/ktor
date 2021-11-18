@@ -155,7 +155,6 @@ private fun <
 
     val currentPlugin = this
     val pluginBuilder = object : ApplicationPluginBuilder<PluginConfigT>(currentPlugin.key) {
-        override val application: Application = TODO()
         override val pipeline: ApplicationCallPipeline = pipeline
         override val pluginConfig: PluginConfigT = config
     }

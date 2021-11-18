@@ -23,13 +23,12 @@ import kotlin.random.*
 /**
  * A plugin that embeds into the HTTP pipeline and extends Ktor functionality.
  **/
+@Suppress("UNUSED_PARAMETER")
 public abstract class ApplicationPluginBuilder<PluginConfig : Any> internal constructor(
     internal val key: AttributeKey<PluginInstance>
 ) : PluginBuilder<PluginConfig> {
 
     public abstract val pluginConfig: PluginConfig
-
-    internal abstract val application: Application
 
     /**
      * A pipeline PluginConfig for the current plugin. See [Pipelines](https://ktor.io/docs/pipelines.html)
@@ -159,7 +158,7 @@ public abstract class ApplicationPluginBuilder<PluginConfig : Any> internal cons
         event: Event<EventConfig>,
         config: EventConfig
     ) {
-        event.install(application, config)
+        TODO()
     }
 
     override fun applicationShutdownHook(hook: (Application) -> Unit) {
