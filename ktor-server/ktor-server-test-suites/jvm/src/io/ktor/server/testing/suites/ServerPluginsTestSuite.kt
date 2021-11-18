@@ -74,7 +74,7 @@ abstract class ServerPluginsTestSuite<TEngine : ApplicationEngine, TConfiguratio
                 sendEvent("afterFinish")
             }
         }
-        onCallRespond { call ->
+        onCallRespond { call, _ ->
             sendEvent("onCallRespond")
 
             call.afterFinish {

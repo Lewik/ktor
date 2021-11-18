@@ -7,50 +7,6 @@ package io.ktor.server.application.plugins.api
 import io.ktor.server.application.*
 
 /**
- * Descendents of [OnCall] allow you to extend handling of an application call.
- *
- * Example:
- * ```
- * onCall { call ->
- *      println(call.request.uri)
- * }
- * ```
- *
- * This will print you a URL for each call to your application.
- **/
-@PluginsDslMarker
-public interface OnCall {
-    /**
-     * Defines how processing an HTTP call needs to be modified by the current [PluginBuilder].
-     *
-     * @param block An action that needs to be executed when your application receives an HTTP call.
-     **/
-    public operator fun invoke(block: suspend CallContext.(call: ApplicationCall) -> Unit): Unit
-}
-
-/**
- * Descendents of [OnCallReceive] allow you to extend the process of receiving data from a client.
- *
- * Example:
- * ```
- * onCallReceive { call ->
- *      println(call.request.uri)
- * }
- * ```
- *
- * This will print you a URL once you execute call.receive() in your server.
- **/
-@PluginsDslMarker
-public interface OnCallReceive {
-    /**
-     * Defines how current [PluginBuilder] needs to transform data received from a client.
-     *
-     * @param block An action that needs to be executed when your application receives data from a client.
-     **/
-    public operator fun invoke(block: suspend CallReceiveContext.(call: ApplicationCall) -> Unit): Unit
-}
-
-/**
  * Descendents of [OnCallReceive] allow you to extend the process of sending a response to the client.
  *
  * Example:
@@ -69,14 +25,7 @@ public interface OnCallReceive {
  * and also prints raw content that is going to be sent to the client.
  **/
 @PluginsDslMarker
-public interface OnCallRespond {
-    /**
-     * Specifies how to transform the data. For example, you can write a custom serializer using this method.
-     *
-     * @param block An action that needs to be executed when your server is sending a response to a client.
-     **/
-    public operator fun invoke(block: suspend CallRespondContext.(call: ApplicationCall) -> Unit)
-
+public interface OnCallRespond<PluginConfig : Any> {
     /**
      * Allows you to execute your code after response transformation has been made.
      * @see StatusPages
@@ -84,6 +33,6 @@ public interface OnCallRespond {
      * @param block An action that needs to be executed after transformation of the response body.
      **/
     public fun afterTransform(
-        block: suspend CallRespondAfterTransformContext.(call: ApplicationCall, responseBody: Any) -> Unit
+        block: suspend CallRespondAfterTransformContext<PluginConfig>.(call: ApplicationCall, responseBody: Any) -> Unit
     )
 }

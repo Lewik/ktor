@@ -146,7 +146,7 @@ class FreeMarkerTest {
         withTestApplication {
             application.setUpTestTemplates()
             application.install(StatusPages) {
-                exception<Throwable> {
+                exception<Throwable> { call, _ ->
                     call.respond("Error: template exception")
                 }
             }

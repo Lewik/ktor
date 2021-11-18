@@ -42,8 +42,8 @@ class ApplicationPluginTest {
         data class Config(var enabled: Boolean = true)
 
         val plugin = createApplicationPlugin("F", createConfiguration = { Config() }) {
-            onCall { call ->
-                if (pluginConfig.enabled) {
+            handle { call ->
+                if (this@createApplicationPlugin.pluginConfig.enabled) {
                     call.respondText("Plugin enabled!")
                     finish()
                 }
@@ -80,7 +80,7 @@ class ApplicationPluginTest {
                     call.attributes.put(key, data)
                 }
             }
-            onCallRespond { call ->
+            onCallRespond { call, _ ->
                 val data = call.attributes.getOrNull(key)
                 if (data != null) {
                     transformBody {
@@ -122,7 +122,7 @@ class ApplicationPluginTest {
     @Test
     fun `test dependent plugins`() {
         val pluginF = createApplicationPlugin("F", {}) {
-            onCallRespond { call ->
+            onCallRespond { call, _ ->
                 val data = call.attributes.getOrNull(FConfig.Key)
                 if (data != null) {
                     transformBody { data }
@@ -132,7 +132,7 @@ class ApplicationPluginTest {
 
         val pluginG = createApplicationPlugin("G", {}) {
             before(pluginF) {
-                onCallRespond { call ->
+                onCallRespond { call, _ ->
                     val data = call.request.headers["F"]
                     if (data != null) {
                         call.attributes.put(FConfig.Key, data)
@@ -172,7 +172,7 @@ class ApplicationPluginTest {
     @Test
     fun `test multiple installs changing config`() {
         val pluginF = createApplicationPlugin("F", { ConfigWithData() }) {
-            onCall { call ->
+            handle { call ->
                 val oldValue = pluginConfig.data
                 pluginConfig.data = "newValue"
                 val newValue = pluginConfig.data
@@ -251,7 +251,7 @@ class ApplicationPluginTest {
                     eventsList.add("afterFinish")
                 }
             }
-            onCallRespond { call ->
+            onCallRespond { call, _ ->
                 eventsList.add("onCallRespond")
 
                 call.afterFinish {
@@ -302,8 +302,8 @@ class ApplicationPluginTest {
         class Config(var data: String)
 
         val plugin = createRouteScopedPlugin("F", { Config("default") }) {
-            onCall {
-                context.call.respond(pluginConfig.data)
+            handle { call ->
+                call.respond(pluginConfig.data)
             }
         }
 
@@ -355,7 +355,7 @@ class ApplicationPluginTest {
     @Test
     fun `test dependent routing scoped plugins`() {
         val pluginF = createRouteScopedPlugin("F", {}) {
-            onCallRespond { call ->
+            onCallRespond { call, _ ->
                 val data = call.attributes.getOrNull(FConfig.Key)
                 if (data != null) {
                     transformBody { data }
@@ -365,7 +365,7 @@ class ApplicationPluginTest {
 
         val pluginG = createRouteScopedPlugin("G", {}) {
             before(pluginF) {
-                onCallRespond { call ->
+                onCallRespond { call, _ ->
                     val data = call.request.headers["F"]
                     if (data != null) {
                         call.attributes.put(FConfig.Key, data)
@@ -405,7 +405,7 @@ class ApplicationPluginTest {
     @Test
     fun `test dependent routing scoped and application plugins`() {
         val pluginF = createApplicationPlugin("F", {}) {
-            onCallRespond { call ->
+            onCallRespond { call, _ ->
                 val data = call.attributes.getOrNull(FConfig.Key)
                 if (data != null) {
                     transformBody { data }
@@ -413,9 +413,9 @@ class ApplicationPluginTest {
             }
         }
 
-        val pluginG = createRouteScopedPlugin("G", {}) {
+        val pluginG = createRouteScopedPlugin("G") {
             before(pluginF) {
-                onCallRespond { call ->
+                onCallRespond { call, _ ->
                     val data = call.request.headers["F"]
                     if (data != null) {
                         call.attributes.put(FConfig.Key, data)
@@ -485,7 +485,7 @@ class ApplicationPluginTest {
                     MyInt(data.readInt())
                 }
             }
-            onCallRespond {
+            onCallRespond { call, _ ->
                 transformBody { data ->
                     if (data !is MyInt) return@transformBody data
 

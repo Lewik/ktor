@@ -14,24 +14,44 @@ import io.ktor.utils.io.*
 
 /**
  * The context associated with the call that is currently being processed by server.
- * Every call handler ([PluginBuilder.onCall], [PluginBuilder.onCallReceive], [PluginBuilder.onCallRespond], and so on)
- * of your plugin has a derivative of [CallHandlingContext] as a receiver.
+ * Every call handler ([ApplicationPluginBuilder.onCall], [ApplicationPluginBuilder.onCallReceive], [ApplicationPluginBuilder.onCallRespond], and so on)
+ * of your plugin has a derivative of [CallContext] as a receiver.
  **/
 @PluginsDslMarker
-public open class CallHandlingContext(internal open val context: PipelineContext<*, ApplicationCall>) {
+public open class CallContext<PluginConfig : Any> internal constructor(
+    public val pluginConfig: PluginConfig,
+    protected open val context: PipelineContext<*, ApplicationCall>
+) {
     // Internal usage for tests only
     internal fun finish() = context.finish()
 }
 
+public open class RestrictedCallContext<PluginConfig : Any> internal constructor(
+    pluginConfig: PluginConfig,
+    context: PipelineContext<*, ApplicationCall>
+) : CallContext<PluginConfig>(pluginConfig, context) {
+
+    @Deprecated("FOOOOOO", level = DeprecationLevel.ERROR)
+    public fun ApplicationCall.respondText(value: String): Nothing = error("")
+}
+
 /**
- * A context associated with the call handlng by your application. [CallContext] is a receiver for [PluginBuilder.onCall] handler
- * of your [PluginBuilder].
+ * A context associated with the call handlng by your application. [OnCallContext] is a receiver for [ApplicationPluginBuilder.onCall] handler
+ * of your [ApplicationPluginBuilder].
  *
- * @see CallHandlingContext
+ * @see CallContext
  **/
 @PluginsDslMarker
-public class CallContext(override val context: PipelineContext<Unit, ApplicationCall>) :
-    CallHandlingContext(context)
+public class OnCallContext<PluginConfig : Any> internal constructor(
+    pluginConfig: PluginConfig,
+    context: PipelineContext<Unit, ApplicationCall>
+) : RestrictedCallContext<PluginConfig>(pluginConfig, context)
+
+@PluginsDslMarker
+public class HandleContext<PluginConfig : Any> internal constructor(
+    pluginConfig: PluginConfig,
+    context: PipelineContext<Unit, ApplicationCall>
+) : CallContext<PluginConfig>(pluginConfig, context)
 
 /**
  * Contains type information about the current request or response body when performing a transformation.
@@ -41,14 +61,15 @@ public class TransformContext(public val requestedType: TypeInfo?)
 
 /**
  * A context associated with the call.receive() action. Allows you to transform the received body.
- * [CallReceiveContext] is a receiver for [PluginBuilder.onCallReceive] handler of your [PluginBuilder].
+ * [CallReceiveContext] is a receiver for [ApplicationPluginBuilder.onCallReceive] handler of your [ApplicationPluginBuilder].
  *
- * @see CallHandlingContext
+ * @see CallContext
  **/
 @PluginsDslMarker
-public class CallReceiveContext(
+public class CallReceiveContext<PluginConfig : Any> internal constructor(
+    pluginConfig: PluginConfig,
     override val context: PipelineContext<ApplicationReceiveRequest, ApplicationCall>
-) : CallHandlingContext(context) {
+) : RestrictedCallContext<PluginConfig>(pluginConfig, context) {
     /**
      * Specifies how to transform a request body that is being received from a client.
      * If another plugin has already made the transformation, then your [transformBody] handler is not executed.
@@ -70,14 +91,15 @@ public class CallReceiveContext(
 
 /**
  *  A context associated with the call.respond() action. Allows you to transform the response body.
- *  [CallRespondContext] is a receiver for [PluginBuilder.onCallRespond] handler of your [PluginBuilder].
+ *  [CallRespondContext] is a receiver for [ApplicationPluginBuilder.onCallRespond] handler of your [ApplicationPluginBuilder].
  *
- * @see CallHandlingContext
+ * @see CallContext
  **/
 @PluginsDslMarker
-public class CallRespondContext(
+public class CallRespondContext<PluginConfig : Any> internal constructor(
+    pluginConfig: PluginConfig,
     override val context: PipelineContext<Any, ApplicationCall>
-) : CallHandlingContext(context) {
+) : RestrictedCallContext<PluginConfig>(pluginConfig, context) {
     /**
      * Specifies how to transform a response body that is being sent to a client.
      **/
@@ -90,14 +112,15 @@ public class CallRespondContext(
 
 /**
  * A context associated with the onCallRespond.afterTransform {...} handler. Allows you to transform the response binary data.
- * [CallRespondAfterTransformContext] is a receiver for [OnCallRespond.afterTransform] handler of your [PluginBuilder].
+ * [CallRespondAfterTransformContext] is a receiver for [OnCallRespond.afterTransform] handler of your [ApplicationPluginBuilder].
  *
- * @see CallHandlingContext
+ * @see CallContext
  **/
 @PluginsDslMarker
-public class CallRespondAfterTransformContext(
+public class CallRespondAfterTransformContext<PluginConfig : Any> internal constructor(
+    pluginConfig: PluginConfig,
     override val context: PipelineContext<Any, ApplicationCall>
-) : CallHandlingContext(context) {
+) : CallContext<PluginConfig>(pluginConfig, context) {
     /**
      * Specifies how to transform the response body already transformed into [OutgoingContent] before sending it to the
      * client.

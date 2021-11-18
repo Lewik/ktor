@@ -5,7 +5,6 @@
 package io.ktor.server.application
 
 import io.ktor.server.application.internal.*
-import io.ktor.server.application.plugins.api.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
